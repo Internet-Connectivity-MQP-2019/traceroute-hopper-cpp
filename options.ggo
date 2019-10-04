@@ -1,0 +1,18 @@
+package "traceroute-hopper"
+version "1.0"
+purpose "Process a CAIDA or RIPE Atlas traceroute records file"
+description "Processes a CAIDA or RIPE Atlas JSON traceroute file and stores results in a PostgreSQL database."
+versiontext "Created by crmyers for an internet connectivity MQP at Worcester Polytechnic Institute (2019-20)"
+
+defgroup "source" groupdesc="Traceroute source" required
+groupoption "atlas" a "RIPE Atlas parsing, intended for processing RIPE Atlas-format traceroute files." group="source"
+groupoption "caida" c "CAIDA parsing, intended for processing CAIDA-format traceroute files." group="source"
+
+defgroup "mode" groupdesc="Processing mode" required
+groupoption "ping" p "Ping mode, records source to destination only." group="mode"
+groupoption "direct" d "Direct mode, records source to all nodes." group="mode"
+groupoption "calculate" x "Approximate calculation mode, records source to all nodes plus node to the next node in sequence." group="mode"
+
+option "buffer" f "Length of processed traceroute hop buffer awaiting DB storage" int optional
+option "verbose" v "Print verbose logging information" optional
+option "dbconfig" b "PostgreSQL connection configuration file, JSON format" string required
