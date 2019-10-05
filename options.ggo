@@ -13,6 +13,6 @@ groupoption "ping" p "Ping mode, records source to destination only." group="mod
 groupoption "direct" d "Direct mode, records source to all nodes." group="mode"
 groupoption "calculate" x "Approximate calculation mode, records source to all nodes plus node to the next node in sequence." group="mode"
 
-option "buffer" f "Length of processed traceroute hop buffer awaiting DB storage" int optional
+option "buffer" f "Length of processed traceroute hop buffer awaiting DB storage" int default="10000" optional
 option "verbose" v "Print verbose logging information" optional
 option "dbconfig" b "PostgreSQL connection configuration file, JSON format" string required

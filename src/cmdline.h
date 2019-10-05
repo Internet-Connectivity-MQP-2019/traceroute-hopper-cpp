@@ -44,7 +44,7 @@ struct gengetopt_args_info
   const char *ping_help; /**< @brief Ping mode, records source to destination only. help description.  */
   const char *direct_help; /**< @brief Direct mode, records source to all nodes. help description.  */
   const char *calculate_help; /**< @brief Approximate calculation mode, records source to all nodes plus node to the next node in sequence. help description.  */
-  int buffer_arg;	/**< @brief Length of processed traceroute hop buffer awaiting DB storage.  */
+  int buffer_arg;	/**< @brief Length of processed traceroute hop buffer awaiting DB storage (default='10000').  */
   char * buffer_orig;	/**< @brief Length of processed traceroute hop buffer awaiting DB storage original value given at command line.  */
   const char *buffer_help; /**< @brief Length of processed traceroute hop buffer awaiting DB storage help description.  */
   const char *verbose_help; /**< @brief Print verbose logging information help description.  */

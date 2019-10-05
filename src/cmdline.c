@@ -43,7 +43,7 @@ const char *gengetopt_args_info_help[] = {
   "  -p, --ping             Ping mode, records source to destination only.",
   "  -d, --direct           Direct mode, records source to all nodes.",
   "  -x, --calculate        Approximate calculation mode, records source to all\n                           nodes plus node to the next node in sequence.",
-  "  -f, --buffer=INT       Length of processed traceroute hop buffer awaiting DB\n                           storage",
+  "  -f, --buffer=INT       Length of processed traceroute hop buffer awaiting DB\n                           storage  (default=`10000')",
   "  -v, --verbose          Print verbose logging information",
   "  -b, --dbconfig=STRING  PostgreSQL connection configuration file, JSON format",
     0
@@ -90,6 +90,7 @@ static
 void clear_args (struct gengetopt_args_info *args_info)
 {
   FIX_UNUSED (args_info);
+  args_info->buffer_arg = 10000;
   args_info->buffer_orig = NULL;
   args_info->dbconfig_arg = NULL;
   args_info->dbconfig_orig = NULL;
@@ -691,7 +692,7 @@ cmdline_parser_internal (
         
           if (update_arg( (void *)&(args_info->buffer_arg), 
                &(args_info->buffer_orig), &(args_info->buffer_given),
-              &(local_args_info.buffer_given), optarg, 0, 0, ARG_INT,
+              &(local_args_info.buffer_given), optarg, 0, "10000", ARG_INT,
               check_ambiguity, override, 0, 0,
               "buffer", 'f',
               additional_error))
