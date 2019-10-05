@@ -19,11 +19,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
 # LIBRARIES
 
 # json
-find_package(nlohmann_json 3.2.0 REQUIRED)
-target_link_libraries(traceroute_hopper PRIVATE nlohmann_json::nlohmann_json)
+#find_package(nlohmann_json 3.2.0 REQUIRED)
+#target_link_libraries(traceroute_hopper PRIVATE nlohmann_json::nlohmann_json)
+find_package(RapidJSON)
 
 # postgres
-find_package(PostgreSQL REQUIRED)
-target_link_libraries(traceroute_hopper PRIVATE ${PostgreSQL_LIBRARIES})
-target_include_directories(traceroute_hopper PRIVATE ${PostgreSQL_INCLUDE_DIRS})
+find_library(PQXX_LIB pqxx)
+find_library(PQ_LIB pq)
+target_link_libraries(traceroute_hopper PRIVATE ${PQXX_LIB} ${PQ_LIB})
+target_include_directories(traceroute_hopper PRIVATE ${PQXX_INCLUDE_DIRS})
 

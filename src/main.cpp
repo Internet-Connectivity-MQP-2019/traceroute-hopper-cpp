@@ -1,12 +1,13 @@
 #include <iostream>
 #include <fstream>
-#include <nlohmann/json.hpp>
+#include <rapidjson/document.h>
+#include <rapidjson/istreamwrapper.h>
 #include <pqxx/pqxx>
 #include <vector>
 #include "cmdline.h"
 
 using namespace std;
-using json = nlohmann::json;
+using namespace rapidjson;
 
 struct Hop {
 public:
@@ -38,13 +39,14 @@ int main(int argc, char** argv) {
 		cerr << "Failed to open database configuration in " << args.dbconfig_arg << endl;
 		return 1;
 	}
-	json dbconfig;
-	dbconfig_file >> dbconfig;
+	Document dbconfig;
+	IStreamWrapper isw(dbconfig_file);
+	dbconfig.ParseStream(isw);
 	dbconfig_file.close();
 
 	// Connect to database
-	pqxx::connection cxn("host=" + string(dbconfig["host"]) + " dbname=" + string(dbconfig["database"]) +
-								" user=" + string(dbconfig["user"]));
+	pqxx::connection cxn("host=" + string(dbconfig["host"].GetString()) + " dbname=" + string(dbconfig["database"].GetString()) +
+								" user=" + string(dbconfig["user"].GetString()));
 
 	// Process each file in the list of given input files
 	bool skippedFiles = false;
@@ -65,15 +67,17 @@ int main(int argc, char** argv) {
 		string baseSrc;
 		int time;
 		vector<float> tempRtts; // Every Atlas traceroute will need special processing, so save a vector on the side.
+		unsigned int count = 0;
 		while(getline(file, line)) {
-			json traceroute = json::parse(line);
+			Document traceroute;
+			traceroute.Parse(line.c_str());
 
 			// If the buffer is full, save it to the database
 			if (hops.size() % args.buffer_arg == 0 && !hops.empty()) {
+				count += hops.size();
 				saveToDb(hops, cxn);
 				if (args.verbose_given)
-					cout << "Processed " << hops.size() << " traceroutes";
-				cout.flush();
+					cout << "Processed " << count << " traceroutes" << endl;
 				hops.clear();
 			}
 
@@ -81,40 +85,41 @@ int main(int argc, char** argv) {
 			if (args.caida_given) {
 				// TODO: RESOLVE DOMAIN NAME
 			} else if (args.atlas_given) {
-				baseSrc = traceroute["from"].get<string>();
+				baseSrc = traceroute["from"].GetString();
 				if (baseSrc.length() == 0)
 					continue;
 
 				// Validation on Atlas data, since some traceroutes fail
-				if (traceroute["result"].size() == 1 && traceroute["result"][0].contains("error"))
+				if (traceroute["result"].Size() == 1 && traceroute["result"][0].HasMember("error"))
 					continue;
 			}
 
 			// Get timestamp
 			if (args.atlas_given)
-				time = traceroute["timestamp"].get<int>();
+				time = traceroute["timestamp"].GetInt();
 			else
-				time = traceroute["start"]["sec"].get<int>();
+				time = traceroute["start"]["sec"].GetInt();
 
 			if (args.ping_given) {
 				// Ping mode -- just do one entry, source to final destination
 				if (args.atlas_given) {
 					bool invalid = false;
-					for (auto result : traceroute["result"][traceroute["result"].size() - 1]["result"]) {
-						if (!result["rtt"].is_number_float()) {
+					auto resultArray = traceroute["result"][traceroute["result"].Size() - 1]["result"].GetArray();
+					for (auto result = resultArray.begin(); result != resultArray.end(); result++) {
+						if (!(*result).HasMember("rtt")) {
 							invalid = true;
 							break;
 						}
-						tempRtts.push_back(result["rtt"].get<float>());
+						tempRtts.push_back((*result)["rtt"].GetFloat());
 					}
 					if (invalid)
 						continue; // Can't parse this traceroute
 
-					Hop hop(baseSrc, traceroute["dst_addr"].get<string>(), average(tempRtts), time, false);
+					Hop hop(baseSrc, traceroute["dst_addr"].GetString(), average(tempRtts), time, false);
 					tempRtts.clear();
 					hops.push_back(hop);
 				} else if (args.caida_given) {
-					Hop hop(baseSrc, traceroute["dst"].get<string>(), traceroute["hops"][traceroute["hops"].size() - 1]["rtt"].get<float>(), time, false);
+					Hop hop(baseSrc, traceroute["dst"].GetString(), traceroute["hops"][traceroute["hops"].Size() - 1]["rtt"].GetFloat(), time, false);
 					hops.push_back(hop);
 				}
 			}
