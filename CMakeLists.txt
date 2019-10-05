@@ -2,8 +2,13 @@ cmake_minimum_required(VERSION 3.15)
 set(PROJECT_NAME traceroute_hopper)
 project(${PROJECT_NAME})
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-g -Wall -Wextra -m64")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.c)
