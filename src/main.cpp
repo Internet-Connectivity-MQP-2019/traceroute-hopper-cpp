@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2019 Christopher Myers
+ *
+ * This file is part of traceroute_hopper.
+ *
+ * traceroute_hopper is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * traceroute_hopper is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with traceroute_hopper.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -36,7 +55,7 @@ int main(int argc, char** argv) {
 
 	// Process each file in the list of given input files
 	bool skippedFiles = false;
-	vector<tuple<string, string, float, int, bool> > hops;
+	vector<tuple<string, string, float, int, bool>> hops;
 	hops.reserve(args.buffer_arg + 1);
 	for (unsigned int fileNum = 0; fileNum < args.inputs_num; fileNum++) {
 		if (args.verbose_given)
@@ -97,7 +116,7 @@ int main(int argc, char** argv) {
 				}
 			} else {
 				// Either direct or calculated mode
-				const auto& hopsArray = args.caida_given ? traceroute["hops"].GetArray() : traceroute["result"].GetArray();
+				GenericArray<false, GenericValue<UTF8<char>>::ValueType> hopsArray = args.caida_given ? traceroute["hops"].GetArray() : traceroute["result"].GetArray();
 				int j = -1;
 				for (auto& hop : hopsArray) {
 					j++;

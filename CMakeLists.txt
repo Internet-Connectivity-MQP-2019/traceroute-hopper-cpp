@@ -8,17 +8,11 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-g -Wall -Wextra -m64")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
-file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
-file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.c)
-list(REMOVE_ITEM SRC_FILES ${PROJECT_SOURCE_DIR}/src/main.cpp)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -s")
 
 # Source code 
-add_library(${PROJECT_NAME}_lib ${SRC_FILES})
-set_target_properties(${PROJECT_NAME}_lib PROPERTIES LINKER_LANGUAGE CXX)
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/src/main.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/src/cmdline.c src/caida.cpp src/caida.hpp src/atlas.cpp src/atlas.hpp)
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 
 # LIBRARIES
