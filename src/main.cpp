@@ -17,11 +17,18 @@
  * along with traceroute_hopper.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Enable SSE4.2/SSE2 optimizations for rapidjson
+#if defined(__SSE4_2__)
+#  define RAPIDJSON_SSE42
+#elif defined(__SSE2__)
+#  define RAPIDJSON_SSE2
+#endif
+#include <rapidjson/document.h>
+#include <rapidjson/istreamwrapper.h>
+
 #include <algorithm>
 #include <iostream>
 #include <fstream>
-#include <rapidjson/document.h>
-#include <rapidjson/istreamwrapper.h>
 #include <pqxx/pqxx>
 #include <vector>
 #include "cmdline.h"
