@@ -25,7 +25,8 @@ using std::make_tuple;
 namespace atlas {
 
 	vector<tuple<string, float>> convertAtlas(const Document& traceroute) {
-		vector<tuple<string, float>> hops(traceroute["result"].Size());
+		vector<tuple<string, float>> hops;
+		hops.reserve(traceroute["result"].Size());
 
 		const auto& hopsArray = traceroute["result"].GetArray();
 		for (const auto& hop : hopsArray) {
@@ -35,7 +36,7 @@ namespace atlas {
 
 			string src = getHopSource(hop["result"].GetArray());
 			if (src.empty())
-				hops.emplace_back("", 0); // Error condition for this hop
+				hops.emplace_back("", -1); // Error condition for this hop
 
 			hops.emplace_back(src, rttAverage(hop["result"].GetArray()));
 		}
@@ -43,22 +44,24 @@ namespace atlas {
 		return hops;
 	}
 
-	float rttAverage(GenericArray<true, GenericValue<UTF8<char>>::ValueType> hops) {
+	float rttAverage(const GenericArray<true, GenericValue<UTF8<char>>::ValueType>& hops) {
 		float total = 0;
+		int count = 0; // Can't use hops.Size() because there might be invalid values
 		for (const auto& hop : hops) {
 			if (!hop.HasMember("rtt"))
 				continue;
 			total += hop["rtt"].GetFloat();
+			count++;
 		}
 
-		if (total == 0)
+		if (total == 0 || count == 0)
 			return -1;
 
-		return total / (float)hops.Size();
+		return total / (float)count;
 	}
 
-	string getHopSource(GenericArray<true, GenericValue<UTF8<char>>::ValueType> hops) {
-		for (const auto& hop :hops) {
+	string getHopSource(const GenericArray<true, GenericValue<UTF8<char>>::ValueType>& hops) {
+		for (const auto& hop : hops) {
 			if (hop.HasMember("from"))
 				return hop["from"].GetString();
 		}

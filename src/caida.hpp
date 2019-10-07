@@ -16,11 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with traceroute_hopper.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef TRACEROUTE_HOPPER_CAIDA_HPP
-#define TRACEROUTE_HOPPER_CAIDA_HPP
 
-#import <rapidjson/document.h>
-#import <vector>
+#include <rapidjson/document.h>
+#include <vector>
 
 using rapidjson::Document;
 using std::vector;
@@ -40,7 +38,14 @@ namespace caida {
 	 * @param domain Domain name
 	 * @return IP
 	 */
-	string resolveHostname(string domain);
-}
+	string resolveHostname(const string& domain);
 
-#endif //TRACEROUTE_HOPPER_CAIDA_HPP
+	/**
+	 * Get timestamp
+	 * @param traceroute Traceroute
+	 * @return Timestamp
+	 */
+	inline int getTimestamp(const Document& traceroute) {
+		return traceroute["start"]["sec"].GetInt();
+	}
+}

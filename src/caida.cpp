@@ -22,13 +22,16 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <tuple>
 
 using std::cerr;
 using std::endl;
 
 namespace caida {
 	vector<tuple<string, float>> convertCaida(const Document& traceroute) {
-		vector<tuple<string, float>> hops(traceroute["hops"].GetArray().Size());
+		vector<tuple<string, float>> hops;
+		hops.reserve(traceroute["hops"].GetArray().Size());
+
 		for (const auto& hop : traceroute["hops"].GetArray())
 			hops.emplace_back(hop["addr"].GetString(), hop["rtt"].GetFloat());
 
@@ -44,6 +47,7 @@ namespace caida {
 				0,
 				NI_NAMEREQD) != 0) {
 			cerr << "Failed to resolve " << domain << endl;
+			return "";
 		}
 
 		return inet_ntoa(addr.sin_addr);

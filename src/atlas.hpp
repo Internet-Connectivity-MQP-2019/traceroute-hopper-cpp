@@ -17,11 +17,8 @@
  * along with traceroute_hopper.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TRACEROUTE_HOPPER_ATLAS_HPP
-#define TRACEROUTE_HOPPER_ATLAS_HPP
-
-#import <rapidjson/document.h>
-#import <vector>
+#include <rapidjson/document.h>
+#include <vector>
 
 using rapidjson::Document;
 using rapidjson::GenericArray;
@@ -45,14 +42,30 @@ namespace atlas {
 	 * @param hops Hops
 	 * @return Average for the given hop, -1 if average failed.
 	 */
-	float rttAverage(GenericArray<true, GenericValue<UTF8<char>>::ValueType> hops);
+	float rttAverage(const GenericArray<true, GenericValue<UTF8<char>>::ValueType>& hops);
 
 	/**
 	 * Get the source of a hop (because Atlas is weird)
 	 * @param hops List of hop measurements
 	 * @return Hop source, empty if no hop recorded
 	 */
-	string getHopSource(GenericArray<true, GenericValue<UTF8<char>>::ValueType> hops);
-};
+	string getHopSource(const GenericArray<true, GenericValue<UTF8<char>>::ValueType>& hops);
 
-#endif //TRACEROUTE_HOPPER_ATLAS_HPP
+	/**
+	 * Check if the traceroute failed and should be discarded
+	 * @param traceroute
+	 * @return
+	 */
+	inline bool checkIfFailed(const Document& traceroute) {
+		return traceroute["result"].Size() == 1 && traceroute["result"][0].HasMember("error");
+	}
+
+	/**
+	 * Get timestamp
+	 * @param traceroute Traceroute
+	 * @return Timestamp
+	 */
+	inline int getTimestamp(const Document& traceroute) {
+		return traceroute["timestamp"].GetInt();
+	}
+};
