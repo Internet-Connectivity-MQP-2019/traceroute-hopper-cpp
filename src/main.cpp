@@ -66,8 +66,9 @@ int main(int argc, char** argv) {
 
 		std::ifstream file(args.inputs[fileNum]);
 		if (!file.is_open()) {
-			cerr << "Failed to open input file " << args.inputs[fileNum] << ", skipping!";
+			cerr << "Failed to open input file " << args.inputs[fileNum] << ", skipping!" << endl;
 			skippedFiles = true;
+			continue;
 		}
 
 		// Loop over each individual traceroute and process it
