@@ -39,17 +39,21 @@ namespace caida {
 	}
 
 	string resolveHostname(const string& domain) {
-		sockaddr_in addr{};
-		if (getnameinfo(reinterpret_cast<const sockaddr *>(&addr),
-				sizeof(sockaddr_in), (char*)domain.c_str(),
-				domain.length(),
-				nullptr,
-				0,
-				NI_NAMEREQD) != 0) {
-			cerr << "Failed to resolve " << domain << endl;
+		addrinfo hints{};
+		addrinfo *result;
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_DGRAM;
+
+		int ret;
+		if ((ret =getaddrinfo(domain.c_str(), nullptr, &hints, &result)) != 0) {
+			cerr << "Failed to resolve " << domain << ": " << strerror(ret) << endl;
 			return "";
 		}
 
+		// getaddrinfo actually returns a linked list but we don't really care about other results. Just extract a
+		// sockaddr_in struct from the first addr in the chain, then free its memory.
+		sockaddr_in addr = *(sockaddr_in*)result->ai_addr;
+		freeaddrinfo(result);
 		return inet_ntoa(addr.sin_addr);
 	}
 }

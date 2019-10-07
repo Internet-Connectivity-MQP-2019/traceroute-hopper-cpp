@@ -8,8 +8,8 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-g -Wall -Wextra -m64")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -s")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -s")
+set(CMAKE_CXX_FLAGS_DEBUG "-Og -g")
 
 # Source code 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/src/cmdline.c src/caida.cpp src/caida.hpp src/atlas.cpp src/atlas.hpp)
