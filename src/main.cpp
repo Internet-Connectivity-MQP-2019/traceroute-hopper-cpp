@@ -31,6 +31,10 @@
 #include <fstream>
 #include <pqxx/pqxx>
 #include <vector>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 #include "cmdline.h"
 #include "caida.hpp"
 #include "atlas.hpp"
@@ -71,12 +75,24 @@ int main(int argc, char** argv) {
 		if (args.verbose_given)
 			cout << "Processing " << args.inputs[fileNum] << endl;
 
-		std::ifstream file(args.inputs[fileNum]);
-		if (!file.is_open()) {
-			cerr << "Failed to open input file " << args.inputs[fileNum] << ", skipping!" << endl;
+		// Map file into memory for faster processing
+		struct stat st{};
+		stat(args.inputs[fileNum], &st);
+		int fd = open(args.inputs[fileNum], O_RDONLY, 0);
+		if (fd < 0) {
+			cerr << "Failed to open file " << args.inputs[fileNum] << ": " << strerror(fd) << endl;
 			skippedFiles = true;
 			continue;
 		}
+		void* data = mmap(0, st.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
+		if (data == MAP_FAILED) {
+			cerr << "Failed to map file " << args.inputs[fileNum] << endl;
+			perror("Cause:");
+			skippedFiles = true;
+			continue;
+		}
+		std::stringstream file;
+		file.rdbuf()->pubsetbuf(static_cast<char *>(data), st.st_size); // Have to convert this into a stream, somehow
 
 		// Loop over each individual traceroute and process it
 		string line;
@@ -153,7 +169,8 @@ int main(int argc, char** argv) {
 		if (args.verbose_given)
 			cout << "Finished processing " << args.inputs[fileNum] << endl;
 		saveToDb(hops, work);
-		file.close();
+		munmap(data, st.st_size);
+		close(fd);
 	}
 
 	if (skippedFiles) {
